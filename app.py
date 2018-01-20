@@ -5,90 +5,53 @@ import pandas as pd
 from flask import Flask, jsonify, render_template
 app = Flask(__name__)
 
+sample_names, otu_desc, meta, wash_dict, sample_list = fetch_data()
+
+# main index function
 @app.route("/")
-    """Return the dashboard homepage."""
+def index():
     return render_template("index.html")
 
+# return sample names list
 @app.route('/names')
-    """List of sample names.
+def name_func():
+    return jsonify(sample_names)
 
-    Returns a list of sample names in the format
-    [
-        "BB_940",
-        "BB_941",
-        "BB_943",
-        "BB_944",
-        "BB_945",
-        "BB_946",
-        "BB_947",
-        ...
-    ]
-
-    """
-
+# return otu descriptions list
 @app.route('/otu')
-    """List of OTU descriptions.
+def otu_func():
+    return jsonify(otu_desc)
 
-    Returns a list of OTU descriptions in the following format
-
-    [
-        "Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Halobacteriaceae;Halococcus",
-        "Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Halobacteriaceae;Halococcus",
-        "Bacteria",
-        "Bacteria",
-        "Bacteria",
-        ...
-    ]
-    """
-
+# return the sample metadata   
 @app.route('/metadata/<sample>')
-    """MetaData for a given sample.
+def meta_func(sample):
+    i = 0
+    for name in sample_names:
+        if name == str(sample):
+            sample_meta = meta[i]
+            break
+        else:
+            i+= 1
+    return jsonify(sample_meta)
 
-    Args: Sample in the format: `BB_940`
-
-    Returns a json dictionary of sample metadata in the format
-
-    {
-        AGE: 24,
-        BBTYPE: "I",
-        ETHNICITY: "Caucasian",
-        GENDER: "F",
-        LOCATION: "Beaufort/NC",
-        SAMPLEID: 940
-    }
-    """
-
+# return the wash frequency for a given sample
 @app.route('/wfreq/<sample>')
-    """Weekly Washing Frequency as a number.
+def wfreq_func(sample):
+    freq = wash_dict[sample]
+    return jsonify(freq)
 
-    Args: Sample in the format: `BB_940`
-
-    Returns an integer value for the weekly washing frequency `WFREQ`
-    """
-
+# get the otu_ids and sample values
 @app.route('/samples/<sample>')
-    """OTU IDs and Sample Values for a given sample.
+def sample_val(sample):
+    j = 0
+    for name in sample_names:
+        if name == str(sample):
+            sample_dict = sample_list[j]
+            print(sample_dict)
+            break
+        else:
+            j+=1
+    return jsonify(sample_dict)
 
-    Sort your Pandas DataFrame (OTU ID and Sample Value)
-    in Descending Order by Sample Value
-
-    Return a list of dictionaries containing sorted lists  for `otu_ids`
-    and `sample_values`
-
-    [
-        {
-            otu_ids: [
-                1166,
-                2858,
-                481,
-                ...
-            ],
-            sample_values: [
-                163,
-                126,
-                113,
-                ...
-            ]
-        }
-    ]
-    """
+if __name__ == "__main__":
+    app.run(debug=True)
