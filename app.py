@@ -47,7 +47,6 @@ def sample_val(sample):
     for name in sample_names:
         if name == str(sample):
             sample_dict = sample_list[j]
-            print(sample_dict)
             break
         else:
             j+=1

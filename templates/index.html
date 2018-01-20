@@ -4,15 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Asteroids</title>
+    <title>Belly Button Biodiversity</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .boxed {
+          border: 1px solid lightgray;
+          border-radius: 10px;
+          padding: 10px; 
+        }
+      </style>
 </head>
 <body>
-    
-    <script src ="plotbuilder.js"></script>
-
-    <select class ="select" id="selDataset" onchange="optionChanged(this.value)"></select>
-
+    <div class = "container">
+        <div class="jumbotron text-center">
+            <h1>Belly Button Biodiversity Dashboard</h1>
+            <h3>Use Interactive Charts to Explore the Dataset</h3>
+        
+        </div>
+        <div class="row" id="selector">
+            <div class="col-md-2">
+                <div class="jumbotron">
+                    <h3>Select Sample</h3>
+                    <select class ="select" id="selDataset" onchange="optionChanged(this.value)"></select>
+                </div>
+                <br>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Sample Metadata</div>
+                    <div class="panel-body" id="sample_metadata"></div>
+                </div>
+            </div>
+            <div class="col-md-10" id="piechart"></div>
+        </div>
+        
     <script>
         function getNames() {
             Plotly.d3.json("/names", function(errr, data){
@@ -31,7 +55,8 @@
             console.log(data1);
             var sampleID = "BB_940";
             console.log(sampleID);
-            getDescInit(sampleID, data1)             
+            getDescInit(sampleID, data1)
+            getMeta(sampleID);             
         })
 
         function getDescInit(sid, data_samp){
@@ -64,8 +89,8 @@
             }];
 
             var layout = {
-                height: 400,
-                width: 500
+                height: 600,
+                width: 800
             };
 
             Plotly.newPlot('piechart', piedata, layout);   
@@ -97,8 +122,7 @@
             }];
 
             var layout2 = {
-                title: 'Marker Size',
-                showlegend: false,
+                showlegend: false
             };
 
             Plotly.newPlot("bubble", bubbledata, layout2)
@@ -108,7 +132,8 @@
         function optionChanged(sid){
             Plotly.d3.json("/samples/" + sid, function(err, data){
                 console.log(data)
-                getDesc(sid, data)             
+                getDesc(sid, data)
+                getMeta(sid)             
             })
         };
         
@@ -174,9 +199,41 @@
 
         };
         
+        function getMeta(sid){
+            Plotly.d3.json("/metadata/" + sid, function(err, data){
+                var age = data["AGE"];
+                var type = data["BBTYPE"];
+                var eth = data["ETHNICITY"];
+                var gender = data["GENDER"];
+                var location = data["LOCATION"];
+                var sampID = data["SAMPLEID"];
+
+                parent = Plotly.d3.select("#sample_metadata").html("")
+
+                var age_data = Plotly.d3.select("#sample_metadata").append("div").attr("class", "age");
+                age_data.append("p").text("Age: " + age);
+
+                var type_data = Plotly.d3.select("#sample_metadata").append("div").attr("class", "bbtype");
+                type_data.append("p").text("BBType: " + type);
+
+                var eth_data = Plotly.d3.select("#sample_metadata").append("div").attr("class", "ethnicity");
+                eth_data.append("p").text("Ethnicity: " + eth);
+
+                var gender_data = Plotly.d3.select("#sample_metadata").append("div").attr("class", "gender");
+                gender_data.append("p").text("Gender: " + gender);
+
+                var location_data = Plotly.d3.select("#sample_metadata").append("div").attr("class", "location");
+                location_data.append("p").text("Location: " + location);
+
+                var sampID_data = Plotly.d3.select("#sample_metadata").append("div").attr("class", "sampleid");
+                sampID_data.append("p").text("Sample ID: " + sampID);
+                
+            });
+        }
     </script>
-    <div id="piechart"></div>
+
     <div id="bubble"></div>
     <div id="wash"></div>
+    </div>
 </body>
 </html>
